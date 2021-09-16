@@ -2,20 +2,9 @@
 
 #include "NonBlockingSerialDriver.hpp"
 
-
-
 char receivedChars[NUM_CHARS];
 boolean newData;
 
-void showNewData()
-{
-  if (newData == true)
-  {
-    Serial.print("This just in ... ");
-    Serial.println(receivedChars);
-    newData = false;
-  }
-}
 
 String echoData(String data) {
   Serial.println("New Data: " + data);
