@@ -13,7 +13,7 @@ void NonBlockingSerialDriver::loop() {
     while (_serial->available() && _newData == false) {
         rc = _serial->read();
 
-        if (_i == NUM_CHARS - 2) {  // Need gap of 2, one for \0, one for 0 index array
+        if (_i >= NUM_CHARS - 2) {  // Need gap of 2, one for \0, one for 0 index array
             // TODO error case here
             _i = NUM_CHARS - 2;
         }

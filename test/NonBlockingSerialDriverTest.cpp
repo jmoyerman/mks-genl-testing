@@ -89,6 +89,23 @@ void test_VerifyAck() {
     Verify(OverloadedMethod(ArduinoFake(Serial), write, size_t(uint8_t)).Using('1')).Once();
 }
 
+// TODO really don't like this test, we should have some kind of an error passed up, but atleast we don't just bomb out
+//   the processor right now with a buffer overflow
+void test_BufferOverflowCase() {
+    // Setup
+    Serial_* serial = ArduinoFakeMock(Serial);
+    NonBlockingSerialDriver *underTest = new NonBlockingSerialDriver(serial, recordMessagesCallback);
+    When(Method(ArduinoFake(Serial), available)).Return(1_Times(1), 100_Times(1), 1_Times(1),  1_Times(0));
+    // (int) cast because arduino is dumb.
+    When(Method(ArduinoFake(Serial), read)).Return(1_Times((int)':'), 100_Times((int)'a'), 1_Times((int)'#'));
+    When(OverloadedMethod(ArduinoFake(Serial), write, size_t(uint8_t))).Return(1);
+
+    // Execute
+    underTest->loop();
+
+    // Asserts
+    TEST_ASSERT_EQUAL_STRING(":aaaaaaaaaaaaaaaaaaaaaaaaaaaaa#", lastMessageArray[0].c_str());
+}
 
 void setUp(void) {
     lastMessageIndex = 0;
@@ -105,6 +122,8 @@ int main() {
     RUN_TEST(test_SimpleMessage_TwoIterations);
 
     RUN_TEST(test_TwoMessages_OneIteration);
+
+    RUN_TEST(test_BufferOverflowCase);
 
     RUN_TEST(test_VerifyAck);
 
