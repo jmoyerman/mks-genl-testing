@@ -28,7 +28,6 @@ void NonBlockingSerialDriver::loop() {
             _receivedChars[_i+1] = '\0';  // terminate for string length
             _i = 0;
             _callback(_receivedChars);
-            //_serial->print(_callback(_receivedChars));
         }
         else {
             _receivedChars[_i] = rc;
