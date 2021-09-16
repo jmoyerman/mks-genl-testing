@@ -1,6 +1,6 @@
 #include "NonBlockingSerialDriver.hpp"
 
-NonBlockingSerialDriver::NonBlockingSerialDriver(HardwareSerial *serial, String (*callback)(String)) {
+NonBlockingSerialDriver::NonBlockingSerialDriver(Serial_ *serial, String (*callback)(String)) {
     _serial = serial;
     _callback = callback;
     _newData = false;
