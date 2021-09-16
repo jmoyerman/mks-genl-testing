@@ -20,7 +20,7 @@ String recordMessagesCallback(String input) {
 
 void test_NoDataAvailable() {
     // Setup
-    Serial_* serial = ArduinoFakeMock(Serial);
+    Stream* serial = (StreamFakeProxy*)ArduinoFakeMock(Serial);
     NonBlockingSerialDriver *underTest = new NonBlockingSerialDriver(serial, throwErrorCallback);
     When(Method(ArduinoFake(Serial), available)).Return(0);
     
@@ -32,7 +32,7 @@ void test_NoDataAvailable() {
 
 void test_SimpleMessage_OneIteration() {
     // Setup
-    Serial_* serial = ArduinoFakeMock(Serial);
+    Stream* serial = (StreamFakeProxy*)ArduinoFakeMock(Serial);
     NonBlockingSerialDriver *underTest = new NonBlockingSerialDriver(serial, recordMessagesCallback);
     When(Method(ArduinoFake(Serial), available)).Return(1, 1, 0);
     When(Method(ArduinoFake(Serial), read)).Return(':', '#');
@@ -46,7 +46,7 @@ void test_SimpleMessage_OneIteration() {
 
 void test_SimpleMessage_TwoIterations() {
     // Setup
-    Serial_* serial = ArduinoFakeMock(Serial);
+    Stream* serial = (StreamFakeProxy*)ArduinoFakeMock(Serial);
     NonBlockingSerialDriver *underTest = new NonBlockingSerialDriver(serial, recordMessagesCallback);
     When(Method(ArduinoFake(Serial), available)).Return(1, 0, 1, 0);
     When(Method(ArduinoFake(Serial), read)).Return(':', '#');
@@ -61,7 +61,7 @@ void test_SimpleMessage_TwoIterations() {
 
 void test_TwoMessages_OneIteration() {
         // Setup
-    Serial_* serial = ArduinoFakeMock(Serial);
+    Stream* serial = (StreamFakeProxy*)ArduinoFakeMock(Serial);
     NonBlockingSerialDriver *underTest = new NonBlockingSerialDriver(serial, recordMessagesCallback);
     When(Method(ArduinoFake(Serial), available)).Return(1, 1, 1, 1, 1, 1, 0);
     When(Method(ArduinoFake(Serial), read)).Return(':', '1', '#',':', '2', '#');
@@ -76,7 +76,7 @@ void test_TwoMessages_OneIteration() {
 
 void test_VerifyAck() {
     // Setup
-    Serial_* serial = ArduinoFakeMock(Serial);
+    Stream* serial = (StreamFakeProxy*)ArduinoFakeMock(Serial);
     NonBlockingSerialDriver *underTest = new NonBlockingSerialDriver(serial, recordMessagesCallback);
     When(Method(ArduinoFake(Serial), available)).Return(1, 0);
     When(Method(ArduinoFake(Serial), read)).Return(0x06);
@@ -89,11 +89,12 @@ void test_VerifyAck() {
     Verify(OverloadedMethod(ArduinoFake(Serial), write, size_t(uint8_t)).Using('1')).Once();
 }
 
+
 // TODO really don't like this test, we should have some kind of an error passed up, but atleast we don't just bomb out
 //   the processor right now with a buffer overflow
 void test_BufferOverflowCase() {
     // Setup
-    Serial_* serial = ArduinoFakeMock(Serial);
+    Stream* serial = (StreamFakeProxy*)ArduinoFakeMock(Serial);
     NonBlockingSerialDriver *underTest = new NonBlockingSerialDriver(serial, recordMessagesCallback);
     When(Method(ArduinoFake(Serial), available)).Return(1_Times(1), 100_Times(1), 1_Times(1),  1_Times(0));
     // (int) cast because arduino is dumb.
@@ -122,10 +123,10 @@ int main() {
     RUN_TEST(test_SimpleMessage_TwoIterations);
 
     RUN_TEST(test_TwoMessages_OneIteration);
+    RUN_TEST(test_VerifyAck);
+
 
     RUN_TEST(test_BufferOverflowCase);
-
-    RUN_TEST(test_VerifyAck);
 
     UNITY_END();
 
